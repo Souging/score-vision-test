@@ -49,6 +49,14 @@ class MultiGPUModelManager:
             self.model_managers[device].load_all_models()
             logger.info(f"为设备 {device} 加载了模型")
         return self.model_managers[device]
+    def clear_all_caches(self):
+        """清理所有设备的模型缓存"""
+        for device, model_manager in self.model_managers.items():
+            try:
+                model_manager.clear_cache()
+                logger.info(f"Cleared model cache on device {device}")
+            except Exception as e:
+                logger.error(f"Error clearing model cache on device {device}: {e}")
 
 def get_available_gpus() -> List[str]:
     """获取系统中可用的所有GPU"""
@@ -63,13 +71,7 @@ def get_available_gpus() -> List[str]:
     available_gpus = []
     for i in range(gpu_count):
         try:
-            free_mem, total_mem = torch.cuda.mem_get_info(i)
-            free_mem_gb = free_mem / (1024**3)
-            logger.info(f"GPU {i}: 可用内存 {free_mem_gb:.2f} GB")
-            
-            # 只有当可用内存超过2GB时才添加此GPU
-            if free_mem_gb > 2.0:
-                available_gpus.append(f"cuda:{i}")
+            available_gpus.append(f"cuda:{i}")
         except Exception as e:
             logger.warning(f"检查GPU {i}内存时出错: {str(e)}")
     
