@@ -13,7 +13,7 @@ Please see [REQUIREMENTS.md](REQUIREMENTS.md) for detailed system requirements.
 ```bash
 # Clone repository
 git clone https://github.com/Souging/score-vision-test.git
-cd score-vision
+cd score-vision-test
 chmod +x bootstrap.sh
 ./bootstrap.sh
 ```
