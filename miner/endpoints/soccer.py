@@ -38,7 +38,7 @@ def get_model_manager(config: Config = Depends(get_config)) -> ModelManager:
 async def process_soccer_video(
     video_path: str,
     model_manager: ModelManager,
-    batch_size: int = 4  # 增加 batch_size 参数，默认为 4
+    batch_size: int = 64  # 增加 batch_size 参数，默认为 4
 ) -> Dict[str, Any]:
     """Process a soccer video and return tracking data."""
     start_time = time.time()
