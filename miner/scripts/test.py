@@ -5,11 +5,11 @@ import os
 import sys
 from pathlib import Path
 import time
+import subprocess
 from loguru import logger
 from typing import List, Dict, Union
 import concurrent.futures
 import multiprocessing as mp  # Import multiprocessing
-
 miner_dir = str(Path(__file__).resolve().parents[1])
 sys.path.insert(0, miner_dir)
 
@@ -22,6 +22,32 @@ from scripts.download_models import download_models
 TEST_VIDEO_URL = "https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/2025_03_23/f2ef17/h1_13e1e0.mp4"
 #TEST_VIDEO_URL = "https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/test_10secs.mov"
 
+
+def concat_video_ffmpeg(input_path: Path) -> Path:
+    """
+    使用 ffmpeg 将视频拼接 3 次，输出新的临时视频路径
+    """
+    logger.info("Concatenating video 3 times using ffmpeg...")
+
+    concat_txt = input_path.with_suffix(".txt")
+    concat_txt.write_text(f"file '{input_path.resolve()}'\n" * 3)
+
+    output_path = input_path.with_name(f"{input_path.stem}_concat.mp4")
+
+    cmd = [
+        "ffmpeg", "-y",
+        "-f", "concat",
+        "-safe", "0",
+        "-i", str(concat_txt),
+        "-c", "copy",
+        str(output_path)
+    ]
+    
+    subprocess.run(cmd, check=True)
+    logger.info(f"Concatenated video saved to {output_path}")
+    concat_txt.unlink()  # 删除临时 concat.txt
+
+    return output_path
 def optimize_coordinates(coords: List[float]) -> List[float]:
     return [round(float(x), 2) for x in coords]
 
@@ -88,6 +114,11 @@ async def main():
         
         logger.info(f"Downloading test video from {TEST_VIDEO_URL}")
         video_path = await download_video(TEST_VIDEO_URL)
+
+        
+        #video_path = concat_video_ffmpeg(video_path)  # 新增拼接逻辑
+        
+        
         logger.info(f"Video downloaded to {video_path}")
         
         available_devices = []
