@@ -16,8 +16,8 @@ from utils.video_downloader import download_video
 from endpoints.soccer import process_soccer_video
 from utils.device import get_optimal_device
 from scripts.download_models import download_models
-
-TEST_VIDEO_URL = "https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/test_10secs.mov"
+TEST_VIDEO_URL = "https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/2025_03_23/f2ef17/h1_13e1e0.mp4"
+#TEST_VIDEO_URL = "https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/test_10secs.mov"
 
 def optimize_coordinates(coords: List[float]) -> List[float]:
     return [round(float(x), 2) for x in coords]
