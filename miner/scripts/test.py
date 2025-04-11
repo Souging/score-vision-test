@@ -149,7 +149,7 @@ async def main():
                     sync_process_soccer_video,
                     str(video_path),
                     available_devices,
-                    48  # 批处理大小
+                    32  # 批处理大小
                 )
             
             logger.info("Optimizing frame data...")
@@ -183,8 +183,7 @@ async def main():
             if 'multi_gpu_manager' in locals():
                 for device in available_devices:
                     try:
-                        model_manager = multi_gpu_manager.get_model_manager(device)
-                        model_manager.clear_cache()
+                        multi_gpu_manager.clear_all_caches()
                         logger.info(f"Cleared model cache on device {device}")
                     except Exception as e:
                         logger.error(f"Error clearing model cache on device {device}: {e}")
