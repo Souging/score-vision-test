@@ -38,7 +38,7 @@ def get_model_manager(config: Config = Depends(get_config)) -> ModelManager:
 async def process_soccer_video(
     video_path: str,
     model_manager: ModelManager,
-    batch_size: int = 40  # 增加 batch_size 参数，默认为 4
+    batch_size: int = 32  # 增加 batch_size 参数，默认为 4
 ) -> Dict[str, Any]:
     """Process a soccer video and return tracking data."""
     start_time = time.time()
@@ -73,7 +73,7 @@ async def process_soccer_video(
             if len(frame_batch) == batch_size:
                 # Batch is full, process it
                 pitch_results = pitch_model(frame_batch, verbose=False)  # 批量推理
-                player_results = player_model(frame_batch, imgsz=1280, verbose=False)  # 批量推理
+                player_results = player_model(frame_batch, imgsz=736, verbose=False)  # 批量推理
                 for i in range(batch_size):  # 遍历 batch 中的每一帧
                     pitch_result = pitch_results[i]
                     player_result = player_results[i]
