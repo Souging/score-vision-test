@@ -28,17 +28,17 @@ CONFIG = SoccerPitchConfiguration()
 # Global model manager instance
 model_manager = None
 
-def get_model_manager(config: Config = Depends(get_config)) -> ModelManager:
+def get_model_manager() -> ModelManager:
     global model_manager
     if model_manager is None:
-        model_manager = ModelManager(device=config.device)
+        model_manager = ModelManager(device="cuda")
         model_manager.load_all_models()
     return model_manager
 
 async def process_soccer_video(
     video_path: str,
     model_manager: ModelManager,
-    batch_size: int = 32  # 增加 batch_size 参数，默认为 4
+    batch_size: int = 24
 ) -> Dict[str, Any]:
     """Process a soccer video and return tracking data."""
     start_time = time.time()
@@ -72,12 +72,12 @@ async def process_soccer_video(
             frame_number_batch.append(frame_number)
             if len(frame_batch) == batch_size:
                 # Batch is full, process it
-                pitch_results = pitch_model(frame_batch, verbose=False)  # 批量推理
-                player_results = player_model(frame_batch, imgsz=736, verbose=False)  # 批量推理
-                for i in range(batch_size):  # 遍历 batch 中的每一帧
+                pitch_results = pitch_model(frame_batch, verbose=False) 
+                player_results = player_model(frame_batch, imgsz=1280, verbose=False)  
+                for i in range(batch_size):  
                     pitch_result = pitch_results[i]
                     player_result = player_results[i]
-                    frame_number = frame_number_batch[i] # 获取对应的帧号
+                    frame_number = frame_number_batch[i] 
                     keypoints = sv.KeyPoints.from_ultralytics(pitch_result)
                     
                     detections = sv.Detections.from_ultralytics(player_result)
@@ -103,7 +103,7 @@ async def process_soccer_video(
                     tracking_data["frames"].append(frame_data)
                     
                 frame_batch = []  # reset batch
-                frame_number_batch = [] # reset 帧号
+                frame_number_batch = [] 
                 if frame_number % 100 == 0:
                     elapsed = time.time() - start_time
                     fps = frame_number / elapsed if elapsed > 0 else 0
@@ -155,7 +155,7 @@ async def process_soccer_video(
 
 async def process_challenge(
     request: Request,
-    config: Config = Depends(get_config),
+    #config: Config = Depends(get_config),
     model_manager: ModelManager = Depends(get_model_manager),
 ):
     logger.info("Attempting to acquire miner lock...")
