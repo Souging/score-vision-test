@@ -80,8 +80,11 @@ class ModelManager:
         Returns:
             YOLO: The requested model
         """
-        return self.load_model(model_name)
+        return  self.models[model_name]
     
     def clear_cache(self) -> None:
         """Clear the model cache."""
-        self.models.clear() 
+        self.models.clear()
+        import torch
+        torch.cuda.empty_cache()
+        self.load_all_models()
