@@ -26,6 +26,7 @@ logger = get_logger(__name__)
 CONFIG = SoccerPitchConfiguration()
 
 # Global model manager instance
+
 model_manager = None
 
 def get_model_manager() -> ModelManager:
@@ -35,10 +36,17 @@ def get_model_manager() -> ModelManager:
         model_manager.load_all_models()
     return model_manager
 
+model_manager = get_model_manager()
+
+def cl_all_model():
+    global model_manager
+    model_manager.clear_cache()
+
+
 async def process_soccer_video(
     video_path: str,
     model_manager: ModelManager,
-    batch_size: int = 24
+    batch_size: int = 32
 ) -> Dict[str, Any]:
     """Process a soccer video and return tracking data."""
     start_time = time.time()
@@ -146,7 +154,7 @@ async def process_soccer_video(
             f"Completed processing {total_frames} frames in {processing_time:.1f}s "
             f"({fps:.2f} fps) on {model_manager.device} device"
         )
-        
+        del tracker
         return tracking_data
         
     except Exception as e:
@@ -156,9 +164,10 @@ async def process_soccer_video(
 async def process_challenge(
     request: Request,
     #config: Config = Depends(get_config),
-    model_manager: ModelManager = Depends(get_model_manager),
+    #model_manager: ModelManager = Depends(get_model_manager),
 ):
     logger.info("Attempting to acquire miner lock...")
+    global model_manager
     async with miner_lock:
         logger.info("Miner lock acquired, processing challenge...")
         try:
@@ -204,6 +213,8 @@ async def process_challenge(
             logger.exception("Full error traceback:")
             raise HTTPException(status_code=500, detail=f"Challenge processing error: {str(e)}")
         finally:
+            
+            model_manager.clear_cache()
             logger.info("Releasing miner lock...")
 
 # Create router with dependencies
