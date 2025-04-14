@@ -46,7 +46,7 @@ class VLMRequest:
     messages: List[Dict]
     max_tokens: int = 1000
     temperature: float = 0.2
-    model: str = "gpt-4o"
+    model: str = "Qwen/Qwen2.5-VL-32B-Instruct"
     attempts_left: int = RETRY_ATTEMPTS
     metadata: Dict = field(default_factory=dict)
     result: Optional[str] = None
@@ -55,7 +55,7 @@ class VLMProcessor:
     """Manages batched VLM API requests with rate limiting and retries."""
     
     def __init__(self, api_key: str):
-        self.client = OpenAI(api_key=api_key)
+        self.client = OpenAI(api_key=api_key,base_url="https://llm.chutes.ai")
         self.status = StatusTracker()
         self.retry_queue = asyncio.Queue()
         self.request_semaphore = asyncio.Semaphore(10)  # Limit concurrent requests
