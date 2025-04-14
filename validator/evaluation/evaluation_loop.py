@@ -317,10 +317,9 @@ async def run_evaluation_loop(
                         FROM responses r
                         JOIN challenges c ON r.challenge_id = c.challenge_id
                         WHERE r.evaluated = FALSE
-                          AND datetime(r.received_at) <= datetime('now', '-' || ? || ' minutes')
                         GROUP BY c.challenge_id, c.video_url, c.type
                         LIMIT 1
-                    """, (VALIDATION_DELAY.total_seconds() / 60,))
+                    """)
                     
                     challenge = cursor.fetchone()
                     
