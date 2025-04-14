@@ -18,7 +18,7 @@ from torch import no_grad
 
 FRAMES_PER_VIDEO = 750
 logger = getLogger("Bounding Box Evaluation Pipeline")
-clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to("cpu")
+clip_model = CLIPModel.from_pretrained("openai/clip-vit-base-patch32").to("cuda")
 data_processor = CLIPProcessor.from_pretrained("openai/clip-vit-base-patch32")
 
 class BoundingBoxObject(Enum):
