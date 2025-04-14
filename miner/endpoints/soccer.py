@@ -34,7 +34,7 @@ def get_model_manager(config: Config = Depends(get_config)) -> ModelManager:
         model_manager = ModelManager(device=config.device)
         model_manager.load_all_models()
     return model_manager
-
+model_manager = get_model_manager()
 async def process_soccer_video(
     video_path: str,
     model_manager: ModelManager,
@@ -184,6 +184,6 @@ router.add_api_route(
     "/challenge",
     process_challenge,
     tags=["soccer"],
-    dependencies=[Depends(blacklist_low_stake), Depends(verify_request)],
+    #dependencies=[Depends(blacklist_low_stake), Depends(verify_request)],
     methods=["POST"],
 )
