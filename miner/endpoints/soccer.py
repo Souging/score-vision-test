@@ -17,7 +17,7 @@ from miner.dependencies import get_config, verify_request, blacklist_low_stake
 from sports.configs.soccer import SoccerPitchConfiguration
 from miner.utils.device import get_optimal_device
 from miner.utils.model_manager import ModelManager
-from miner.utils.video_processor import VideoProcessor
+from miner.utils.video_processor_bak import VideoProcessor
 from miner.utils.shared import miner_lock
 from miner.utils.video_downloader import download_video
 
