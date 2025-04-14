@@ -165,6 +165,7 @@ async def process_challenge(
                 
             finally:
                 try:
+                    model_manager.clear_cache()
                     os.unlink(video_path)
                 except:
                     pass
