@@ -60,7 +60,7 @@ async def process_soccer_video(
         pitch_model = model_manager.get_model("pitch")
         
         tracker = sv.ByteTrack()
-        batch_size = 10
+        batch_size = 15
         frame_batch = []
         tracking_data = {"frames": []}
         
