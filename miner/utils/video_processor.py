@@ -16,8 +16,8 @@ class VideoProcessor:
         cuda_timeout: float = 900.0,
         mps_timeout: float = 1800.0,
         cpu_timeout: float = 10800.0,
-        max_frames_in_memory: int = 300,  # 内存中保存的最大帧数
-        batch_size: int = 10,  # 批量读取帧数
+        max_frames_in_memory: int = 750,  # 内存中保存的最大帧数
+        batch_size: int = 15,  # 批量读取帧数
         preprocess_options: Optional[Dict[str, Any]] = None,
     ):
         self.device = device
