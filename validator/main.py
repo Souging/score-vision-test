@@ -48,7 +48,7 @@ validator_dir = Path(__file__).parent
 env_path = validator_dir / ".env"
 load_dotenv(env_path)
 
-
+#  challenge_data = {"task_id":1,"video_url":"https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/2025_03_23/f2ef17/h1_13e1e0.mp4"}
                     
 class ChallengeTask:
     def __init__(self, node_id: int, task: asyncio.Task, timestamp: datetime, challenge: GSRChallenge, miner_hotkey: str):
