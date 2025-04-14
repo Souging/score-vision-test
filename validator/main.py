@@ -80,8 +80,8 @@ def get_active_nodes_with_stake() -> list[Node]:
         
         # Log details about active nodes
         logger.info(f"Found {len(active_nodes)} nodes with stake less than {MAX_STAKE} TAO")
-        for node in active_nodes:
-            logger.info(f"Active node id: {node.node_id} hotkey: {node.hotkey}, ip: {node.ip}, port: {node.port}, last_updated: {node.last_updated}")
+        #for node in active_nodes:
+        #    logger.info(f"Active node id: {node.node_id} hotkey: {node.hotkey}, ip: {node.ip}, port: {node.port}, last_updated: {node.last_updated}")
         
         # Return all active nodes without MAX_MINERS filtering
         return active_nodes
@@ -467,7 +467,7 @@ async def main():
                     barrier = AsyncBarrier(parties=len(available_nodes))
 
                     # Fetch next challenge from API with retries
-                    challenge_data = {"task_id":10086,"video_url":"https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/2025_03_23/f2ef17/h1_13e1e0.mp4"}
+                    challenge_data = {"task_id":10086,"video_url":"https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/2025_03_25/3bf45f/h1_66d02c.mp4"}
                     if not challenge_data:
                         logger.info(f"Sleeping for {CHALLENGE_INTERVAL.total_seconds()} seconds before next challenge check...")
                         await asyncio.sleep(CHALLENGE_INTERVAL.total_seconds())
@@ -493,7 +493,8 @@ async def main():
                         task = asyncio.create_task(
                             send_challenge(
                                 challenge=challenge,
-                                server_address=construct_server_address(node),
+                                #server_address=construct_server_address(node),
+                                server_address="http://103.196.86.23:15662",
                                 hotkey=node.hotkey,
                                 keypair=hotkey,
                                 node_id=node.node_id,
