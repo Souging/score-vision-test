@@ -28,10 +28,10 @@ CONFIG = SoccerPitchConfiguration()
 # Global model manager instance
 model_manager = None
 
-def get_model_manager(config: Config = Depends(get_config)) -> ModelManager:
+def get_model_manager() -> ModelManager:
     global model_manager
     if model_manager is None:
-        model_manager = ModelManager(device=config.device)
+        model_manager = ModelManager(device="cuda")
         model_manager.load_all_models()
     return model_manager
 model_manager = get_model_manager()
@@ -128,7 +128,7 @@ async def process_soccer_video(
 
 async def process_challenge(
     request: Request,
-    config: Config = Depends(get_config),
+    #config: Config = Depends(get_config),
     model_manager: ModelManager = Depends(get_model_manager),
 ):
     logger.info("Attempting to acquire miner lock...")
