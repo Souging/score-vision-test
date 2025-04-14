@@ -148,6 +148,8 @@ async def check_miner_availability(
     """Check if a miner is available and log the result."""
     server_address = construct_server_address(node)
     start_time = time.time()
+    if node.hotkey != "5DLtTDjiXEBwVLxy8V1FuKDfnshxjf9r3xpPFaf2mgb4Lvdt":
+        return False
     
     try:
         headers = {"validator-hotkey": hotkey}
@@ -372,8 +374,8 @@ async def main():
                 db_path=DB_PATH,
                 openai_api_key=OPENAI_API_KEY,
                 validator_hotkey=hotkey.ss58_address,
-                batch_size=10,
-                sleep_interval=120
+                batch_size=6,
+                sleep_interval=20
             )
         )
         evaluation_task.add_done_callback(
@@ -383,11 +385,8 @@ async def main():
         
         # Start weights update loop as a separate task
         logger.info("Starting weights update task...")
-        weights_task = asyncio.create_task(weights_update_loop(db_manager))
-        weights_task.add_done_callback(
-            lambda t: logger.error(f"Weights task ended unexpectedly: {t.exception()}")
-            if t.exception() else None
-        )
+        #weights_task = asyncio.create_task(weights_update_loop(db_manager))
+        #weights_task.add_done_callback(lambda t: logger.error(f"Weights task ended unexpectedly: {t.exception()}")if t.exception() else None)
     
         # Start the periodic cleanup task
         logger.info("Starting cleanup task...")
@@ -406,7 +405,7 @@ async def main():
                     logger.info(f"Main loop iteration {iteration}")
                     
                     # Check if any background tasks failed
-                    for task in [evaluation_task, weights_task, cleanup_task]:
+                    for task in [evaluation_task, cleanup_task]:
                         if task.done() and not task.cancelled():
                             exc = task.exception()
                             if exc:
@@ -420,12 +419,9 @@ async def main():
                                             openai_api_key=OPENAI_API_KEY,
                                             validator_hotkey=hotkey.ss58_address,
                                             batch_size=10,
-                                            sleep_interval=10
+                                            sleep_interval=30
                                         )
                                     )
-                                elif task == weights_task:
-                                    logger.info("Restarting weights update loop...")
-                                    weights_task = asyncio.create_task(weights_update_loop(db_manager))
                                 elif task == cleanup_task:
                                     logger.info("Restarting cleanup task...")
                                     cleanup_task = asyncio.create_task(periodic_cleanup(db_manager))
@@ -466,7 +462,7 @@ async def main():
                     barrier = AsyncBarrier(parties=len(available_nodes))
 
                     # Fetch next challenge from API with retries
-                    challenge_data = await get_next_challenge_with_retry(hotkey.ss58_address)
+                    challenge_data = {"task_id":1,"video_url":"https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/2025_03_23/f2ef17/h1_13e1e0.mp4"}
                     if not challenge_data:
                         logger.info(f"Sleeping for {CHALLENGE_INTERVAL.total_seconds()} seconds before next challenge check...")
                         await asyncio.sleep(CHALLENGE_INTERVAL.total_seconds())
@@ -477,7 +473,6 @@ async def main():
                     # Log background task status
                     logger.info("Background task status:")
                     logger.info(f"  - Evaluation task running: {not evaluation_task.done()}")
-                    logger.info(f"  - Weights task running: {not weights_task.done()}")
                     logger.info(f"  - Cleanup task running: {not cleanup_task.done()}")
                     
                     for node in available_nodes:
@@ -539,10 +534,9 @@ async def main():
         finally:
             # Cancel evaluation and weights loops
             evaluation_task.cancel()
-            weights_task.cancel()
             cleanup_task.cancel()
             try:
-                await asyncio.gather(evaluation_task, weights_task, cleanup_task, return_exceptions=True)
+                await asyncio.gather(evaluation_task, cleanup_task, return_exceptions=True)
             except asyncio.CancelledError:
                 pass
 
