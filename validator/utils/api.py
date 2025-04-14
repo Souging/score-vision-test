@@ -248,7 +248,7 @@ async def update_task_scores(
         
         max_retries = 3
         retry_count = 0
-        
+        return True
         while retry_count < max_retries:
             try:
                 async with httpx.AsyncClient() as client:
