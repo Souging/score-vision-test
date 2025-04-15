@@ -7,7 +7,7 @@ import supervision as sv
 from loguru import logger
 
 class VideoProcessor:
-    """Handles video processing with frame streaming and timeout management."""
+    """Handles video processing with frame streaming, resolution reduction, and frame skipping."""
     
     def __init__(
         self,
@@ -15,6 +15,10 @@ class VideoProcessor:
         cuda_timeout: float = 900.0,  # 15 minutes for CUDA
         mps_timeout: float = 1800.0,  # 30 minutes for MPS
         cpu_timeout: float = 10800.0,  # 3 hours for CPU
+        frame_skip: int = 0,  # Process every frame by default
+        resolution_factor: float = 1.0,  # Full resolution by default
+        use_keyframes: bool = True,  # Use keyframe detection
+        scene_threshold: float = 0.3,  # Threshold for scene change detection
     ):
         self.device = device
         # Set timeout based on device
@@ -24,8 +28,45 @@ class VideoProcessor:
             self.processing_timeout = mps_timeout
         else:  # cpu or any other device
             self.processing_timeout = cpu_timeout
+        
+        # Frame processing parameters
+        self.frame_skip = max(0, frame_skip)  # Ensure non-negative
+        self.resolution_factor = max(0.1, min(1.0, resolution_factor))  # Between 0.1 and 1.0
+        self.use_keyframes = use_keyframes
+        self.scene_threshold = scene_threshold
+        self.prev_frame = None  # Store previous frame for scene change detection
             
         logger.info(f"Video processor initialized with {device} device, timeout: {self.processing_timeout:.1f}s")
+        logger.info(f"Frame skip: {self.frame_skip}, Resolution factor: {self.resolution_factor:.2f}")
+        logger.info(f"Keyframe detection: {'Enabled' if self.use_keyframes else 'Disabled'}")
+    
+    def _resize_frame(self, frame: np.ndarray) -> np.ndarray:
+        """Resize frame based on resolution factor."""
+        if self.resolution_factor == 1.0:
+            return frame
+        
+        h, w = frame.shape[:2]
+        new_h, new_w = int(h * self.resolution_factor), int(w * self.resolution_factor)
+        return cv2.resize(frame, (new_w, new_h), interpolation=cv2.INTER_AREA)
+    
+    def _is_keyframe(self, frame: np.ndarray) -> bool:
+        """Detect if the current frame is a keyframe (significant scene change)."""
+        if not self.use_keyframes or self.prev_frame is None:
+            self.prev_frame = frame.copy()
+            return True
+        
+        # Convert frames to grayscale for comparison
+        prev_gray = cv2.cvtColor(self.prev_frame, cv2.COLOR_BGR2GRAY)
+        curr_gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        
+        # Calculate frame similarity using structural similarity index
+        score = cv2.matchTemplate(prev_gray, curr_gray, cv2.TM_CCOEFF_NORMED)[0][0]
+        is_key = score < (1.0 - self.scene_threshold)
+        
+        # Update previous frame
+        self.prev_frame = frame.copy()
+        
+        return is_key
     
     async def stream_frames(
         self,
@@ -33,7 +74,7 @@ class VideoProcessor:
     ) -> AsyncGenerator[Tuple[int, np.ndarray], None]:
         """
         Stream video frames asynchronously with timeout protection.
-        Process ALL frames regardless of compute device.
+        Applies frame skipping and resolution reduction based on settings.
         
         Args:
             video_path: Path to the video file
@@ -49,12 +90,15 @@ class VideoProcessor:
         
         try:
             frame_count = 0
+            frames_processed = 0
+            self.prev_frame = None  # Reset previous frame
+            
             while True:
                 elapsed_time = time.time() - start_time
                 if elapsed_time > self.processing_timeout:
                     logger.warning(
                         f"Video processing timeout reached after {elapsed_time:.1f}s "
-                        f"on {self.device} device ({frame_count} frames processed)"
+                        f"on {self.device} device ({frames_processed}/{frame_count} frames processed)"
                     )
                     break
                 
@@ -64,10 +108,25 @@ class VideoProcessor:
                 )
                 
                 if not ret:
-                    logger.info(f"Completed processing {frame_count} frames in {elapsed_time:.1f}s on {self.device} device")
+                    logger.info(
+                        f"Completed processing {frames_processed}/{frame_count} frames "
+                        f"in {elapsed_time:.1f}s on {self.device} device"
+                    )
                     break
                 
-                yield frame_count, frame
+                # Process this frame if it's a keyframe or if we're not skipping this frame
+                process_this_frame = (
+                    (frame_count % (self.frame_skip + 1) == 0) or  # Frame skip logic
+                    (self.use_keyframes and self._is_keyframe(frame))  # Keyframe logic
+                )
+                
+                if process_this_frame:
+                    # Resize frame if needed
+                    resized_frame = self._resize_frame(frame)
+                    
+                    yield frame_count, resized_frame
+                    frames_processed += 1
+                
                 frame_count += 1
                 
                 # Small delay to prevent CPU hogging while still processing all frames
