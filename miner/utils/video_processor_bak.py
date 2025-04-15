@@ -11,14 +11,14 @@ class VideoProcessor:
     
     def __init__(
         self,
-        device: str = "cpu",
+        device: str = "cuda",
         cuda_timeout: float = 900.0,  # 15 minutes for CUDA
         mps_timeout: float = 1800.0,  # 30 minutes for MPS
         cpu_timeout: float = 10800.0,  # 3 hours for CPU
         frame_skip: int = 0,  # Process every frame by default
         resolution_factor: float = 1,  # Full resolution by default
         use_keyframes: bool = True,  # Use keyframe detection
-        scene_threshold: float = 0.05,  # Threshold for scene change detection
+        scene_threshold: float = 0.3,  # Threshold for scene change detection
     ):
         self.device = device
         # Set timeout based on device
@@ -37,7 +37,7 @@ class VideoProcessor:
         self.prev_frame = None  # Store previous frame for scene change detection
             
         logger.info(f"Video processor initialized with {device} device, timeout: {self.processing_timeout:.1f}s")
-        logger.info(f"Frame skip: {self.frame_skip}, Resolution factor: {self.resolution_factor:.2f} ,scene threshold:{self.scene_threshold:.2f}")
+        logger.info(f"Frame skip: {self.frame_skip}, Resolution factor: {self.resolution_factor:.2f} , scene threshold: {self.scene_threshold:.2f}")
         logger.info(f"Keyframe detection: {'Enabled' if self.use_keyframes else 'Disabled'}")
     
     def _resize_frame(self, frame: np.ndarray) -> np.ndarray:
