@@ -148,7 +148,7 @@ async def check_miner_availability(
     """Check if a miner is available and log the result."""
     server_address = construct_server_address(node)
     start_time = time.time()
-    if node.hotkey != "5DLtTDjiXEBwVLxy8V1FuKDfnshxjf9r3xpPFaf2mgb4Lvdt":
+    if node.hotkey != "5Dw7ZV8VShJCQP1KaPEZMHTk3fFyehbeuCWCHnnnWZT2Pb4A":
         return False
     try:
         headers = {"validator-hotkey": hotkey}
@@ -465,9 +465,35 @@ async def main():
                     challenge_time = time.time()
                     new_challenge_tasks = []
                     barrier = AsyncBarrier(parties=len(available_nodes))
-
+                    video_urls = [
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_0164eb.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_04c07e.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_083a0c.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_08e0c0.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_1060ce.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_112cd8.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_1316ea.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_160a10.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_1b7c74.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_207e3c.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_22712d.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_2294a6.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_2a9e16.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_2c09a9.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_2d1c32.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_32102b.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_32aefd.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_334f84.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_348840.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_34913b.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_358c97.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_3700c5.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_434a1b.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_439301.mp4",
+                        "https://pub-b06dbf3846db408883132d1637fee7e3.r2.dev/2015-08-29_Chelsea_Crystal_Palace/1_447012.mp4"
+                    ]
                     # Fetch next challenge from API with retries
-                    challenge_data = {"task_id":10086,"video_url":"https://pub-a55bd0dbae3c4afd86bd066961ab7d1e.r2.dev/2025_03_25/3bf45f/h1_66d02c.mp4"}
+                    challenge_data = {"task_id":10086,"video_url":random.choice(video_urls)}
                     if not challenge_data:
                         logger.info(f"Sleeping for {CHALLENGE_INTERVAL.total_seconds()} seconds before next challenge check...")
                         await asyncio.sleep(CHALLENGE_INTERVAL.total_seconds())
@@ -494,7 +520,7 @@ async def main():
                             send_challenge(
                                 challenge=challenge,
                                 #server_address=construct_server_address(node),
-                                server_address="http://103.196.86.23:15662",
+                                server_address="http://127.0.0.1:7999",
                                 hotkey=node.hotkey,
                                 keypair=hotkey,
                                 node_id=node.node_id,
